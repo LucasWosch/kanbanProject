@@ -1,6 +1,5 @@
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,23 +11,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProjectListScreen(
     projects: List<Project>,
     onProjectClick: (Project) -> Unit,
     onAddProjectClick: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Lista de Projetos") })
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddProjectClick) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Adicionar Projeto")
             }
         }
-    ) {
+    ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(16.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
             items(projects) { project ->
                 ProjectItem(project = project, onClick = { onProjectClick(project) })

@@ -13,7 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kabanproject.ui.loginScreen.LoginScreen
 import com.example.kabanproject.ui.registerScreen.RegisterScreen
-import sampleProjects
+import com.example.kabanproject.navigation.sampleProjects
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

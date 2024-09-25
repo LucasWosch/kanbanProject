@@ -9,6 +9,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -21,11 +22,12 @@ fun AddProjectScreen(onAddProjectSuccess: (Project) -> Unit) {
         topBar = {
             TopAppBar(title = { Text("Adicionar Novo Projeto") })
         }
-    ) {
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(innerPadding)
+                .padding(16.dp) // Adiciona padding extra para evitar sobreposição
         ) {
             TextField(
                 value = projectName,
@@ -45,3 +47,4 @@ fun AddProjectScreen(onAddProjectSuccess: (Project) -> Unit) {
         }
     }
 }
+
