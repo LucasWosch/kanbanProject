@@ -1,4 +1,4 @@
-package com.example.kabanproject.ui.login
+package com.example.kabanproject.ui.loginScreen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -14,18 +14,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.compose.material3.TextButton
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -37,7 +31,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.labelSmall)
+        Text(text = "Login", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -54,78 +48,35 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             value = password,
             onValueChange = { password = it },
             label = { Text("Senha") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVisibility)
-                VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                val image = if (passwordVisibility)
-                    Icons.Default.Visibility
-                else
-                    Icons.Default.VisibilityOff
-
-                IconButton(onClick = {
-                    passwordVisibility = !passwordVisibility
-                }) {
-                    Icon(
-                        imageVector = image,
-                        contentDescription = if (passwordVisibility)
-                            "Ocultar senha" else "Mostrar senha"
-                    )
+                val icon = if (passwordVisibility) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
+                    Icon(imageVector = icon, contentDescription = "Ver senha")
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                // Aqui simula o sucesso do login
+                // Simula sucesso do login
                 onLoginSuccess()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Entrar")
         }
-    }
-}
 
-@Composable
-fun HomeScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(text = "Bem-vindo à Home!")
-    }
-}
+        Spacer(modifier = Modifier.height(16.dp))
 
-@Composable
-fun AppNavigator(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "login") {
-        composable("login") {
-            LoginScreen(onLoginSuccess = {
-                navController.navigate("home") {
-                    popUpTo("login") { inclusive = true } // Remove a tela de login da pilha de navegação
-                }
-            })
-        }
-
-        composable("home") {
-            HomeScreen()
+        TextButton(onClick = {
+            // Navega para a tela de cadastro
+            onRegisterClick()
+        }) {
+            Text(text = "Cadastre-se")
         }
     }
-}
-
-@Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-    AppNavigator(navController = navController)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    MainScreen()
 }
