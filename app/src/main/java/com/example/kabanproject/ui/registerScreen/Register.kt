@@ -1,41 +1,33 @@
 package com.example.kabanproject.ui.registerScreen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-
+import com.example.kabanproject.data.model.user.User
+import com.example.kabanproject.ui.viewModels.UserViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun RegisterScreen(onRegisterSuccess: () -> Unit) {
+fun RegisterScreen(
+    userRepository: UserViewModel,
+    onRegisterSuccess: () -> Unit
+) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     var confirmPasswordVisibility by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,10 +90,40 @@ fun RegisterScreen(onRegisterSuccess: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Exibe uma mensagem de erro, se houver
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         Button(
             onClick = {
-                // Lógica de cadastro aqui (validar campos, salvar dados)
-                onRegisterSuccess()
+                coroutineScope.launch {
+                    // Verifica se os campos são válidos
+                    if (username.isBlank() || email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
+                        errorMessage = "Todos os campos são obrigatórios"
+                        return@launch
+                    }
+                    if (password != confirmPassword) {
+                        errorMessage = "As senhas não coincidem"
+                        return@launch
+                    }
+
+                    // Verifica se o email já está cadastrado
+                    val existingUser = userRepository.getUserByEmail(email)
+                    if (existingUser != null) {
+                        errorMessage = "O email já está cadastrado"
+                    } else {
+                        // Cadastra o novo usuário
+                        val newUser = User(username = username, email = email, password = password)
+                        userRepository.saveUser(newUser)
+                        onRegisterSuccess()
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

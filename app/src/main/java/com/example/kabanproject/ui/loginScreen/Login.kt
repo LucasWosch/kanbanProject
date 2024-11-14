@@ -2,27 +2,29 @@ package com.example.kabanproject.ui.loginScreen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.TextButton
+import com.example.kabanproject.ui.viewModels.UserViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
+fun LoginScreen(
+    userRepository: UserViewModel,
+    onLoginSuccess: () -> Unit,
+    onRegisterClick: () -> Unit
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,10 +62,26 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Exibe uma mensagem de erro, se houver
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
         Button(
             onClick = {
-                // Simula sucesso do login
-                onLoginSuccess()
+                coroutineScope.launch {
+                    val user = userRepository.getUserByEmail(username)
+                    if (user != null && user.password == password) {
+                        onLoginSuccess()
+                    } else {
+                        errorMessage = "Usuário ou senha inválidos"
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -72,10 +90,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onRegisterClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = {
-            // Navega para a tela de cadastro
-            onRegisterClick()
-        }) {
+        TextButton(onClick = onRegisterClick) {
             Text(text = "Cadastre-se")
         }
     }

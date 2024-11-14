@@ -1,31 +1,33 @@
 package com.example.kabanproject.navigation
 
 import AddProjectScreen
-import Project
 import ProjectDetailScreen
 import ProjectListScreen
+import TaskDetailScreen
+import TaskFormScreen
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.kabanproject.model.Task
-import com.example.kabanproject.model.TaskStatus
 import com.example.kabanproject.ui.loginScreen.LoginScreen
 import com.example.kabanproject.ui.registerScreen.RegisterScreen
-import com.example.kabanproject.ui.task.TaskDetailScreen
-import com.example.kabanproject.ui.task.TaskFormScreen
-
+import com.example.kabanproject.ui.viewModels.ProjectViewModel
+import com.example.kabanproject.ui.viewModels.TaskViewModel
+import com.example.kabanproject.ui.viewModels.UserViewModel
 
 @Composable
-fun NavigationGraph() {
+fun NavigationGraph(
+    projectViewModel: ProjectViewModel,
+    taskViewModel: TaskViewModel,
+    userViewModel: UserViewModel
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "login") {
         // Tela de Login
         composable("login") {
             LoginScreen(
+                userRepository = userViewModel,  // Passando userRepository para a tela de login
                 onLoginSuccess = {
                     navController.navigate("projectList") {
                         popUpTo("login") { inclusive = true }
@@ -39,18 +41,21 @@ fun NavigationGraph() {
 
         // Tela de Cadastro de Usuários
         composable("register") {
-            RegisterScreen(onRegisterSuccess = {
-                navController.navigate("login") {
-                    popUpTo("login") { inclusive = true }
+            RegisterScreen(
+                userRepository = userViewModel,  // Passando userRepository para a tela de registro
+                onRegisterSuccess = {
+                    navController.navigate("login") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
-            })
+            )
         }
-
 
         // Tela de Adição de Projetos
         composable("addProject") {
             AddProjectScreen(
-                navController = navController,  // Passando o navController aqui
+                projectViewModel = projectViewModel,  // Passando projectRepository para a tela de adição de projetos
+                navController = navController,
                 onAddProjectSuccess = {
                     navController.navigate("projectList") {
                         popUpTo("projectList") { inclusive = true }
@@ -58,9 +63,11 @@ fun NavigationGraph() {
                 }
             )
         }
+
+        // Tela de Lista de Projetos
         composable("projectList") {
             ProjectListScreen(
-                projects = sampleProjects(),
+                projectViewModel = projectViewModel,  // Passando projectRepository para a tela de lista de projetos
                 onProjectClick = { project ->
                     navController.navigate("projectDetailScreen/${project.id}")
                 },
@@ -71,81 +78,45 @@ fun NavigationGraph() {
             )
         }
 
+        // Tela de Detalhes do Projeto
         composable("projectDetailScreen/{projectId}") { backStackEntry ->
-            // Recebe o projectId como String e converte para Int
-            val projectId = backStackEntry.arguments?.getString("projectId")?.toIntOrNull()
+            val projectId = backStackEntry.arguments?.getString("projectId")
 
-            // Busca o projeto correspondente pelo ID
-            val project = projectId?.let { id -> sampleProjects().firstOrNull { it.id == id } }
-
-            // Verifica se o projeto existe e, se sim, exibe a tela de detalhes
-            if (project != null) {
-                ProjectDetailScreen(
-                    projectId = projectId.toString(), // Passa o ID como String se necessário
-                    navController = navController,
-                    project = project
-                )
-            }
+            ProjectDetailScreen(
+                projectId = projectId,
+                navController = navController,
+                projectRepository = projectViewModel  // Passa o repositório para carregamento dentro da tela
+            )
         }
 
-        // Detalhamento da Tarefa
+
+        // Tela de Detalhes da Tarefa
         composable("taskDetail/{taskId}") { backStackEntry ->
-            val taskId = backStackEntry.arguments?.getString("taskId")?.toIntOrNull()
-            val task = taskId?.let { id -> sampleTasks().firstOrNull { it.id == id } }
+            val taskId = backStackEntry.arguments?.getString("taskId")
 
-            if (task != null) {
-                TaskDetailScreen(
-                    taskId = taskId.toString(),
-                    navController = navController,
-                    task = task
-                )
-            }
+            TaskDetailScreen(
+                taskId = taskId,
+                navController = navController,
+                taskRepository = taskViewModel  // Passa o repositório para que o carregamento ocorra dentro da tela
+            )
         }
 
-        // Cadastro de Tarefas
-        composable("taskForm/{taskId}") { backStackEntry ->
+
+        // Tela de Cadastro de Tarefas
+        composable("taskForm/{taskId}/{projectId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
+            val projectId = backStackEntry.arguments?.getString("projectId") ?: ""
 
             TaskFormScreen(
                 taskId = taskId,
-                navController = navController,
-                onSaveTask = { task ->
-                    // Lógica de salvar tarefa
-                }
+                projectId = projectId,
+                taskRepository = taskViewModel,
+                projectRepository = projectViewModel,
+                navController = navController
             )
         }
+
 
     }
 }
 
-// Função de exemplo para criar uma lista de projetos
-fun sampleProjects(): List<Project> {
-    return listOf(
-        Project(
-            id = 1,
-            name = "Projeto Kanban 1",
-            tasks = listOf(
-                Task(1, "Tarefa 1", "Descrição da Tarefa 1", TaskStatus.TODO),
-                Task(2, "Tarefa 2", "Descrição da Tarefa 2", TaskStatus.DOING),
-                Task(3, "Tarefa 3", "Descrição da Tarefa 3", TaskStatus.DONE)
-
-            )
-        ),
-        Project(
-            id = 2,
-            name = "Projeto Kanban 2",
-            tasks = listOf(
-                Task(2, "Tarefa 2", "Descrição da Tarefa 2", TaskStatus.DOING),
-                Task(3, "Tarefa 3", "Descrição da Tarefa 3", TaskStatus.DONE)
-
-            )
-        )
-    )
-}
-fun sampleTasks(): List<Task> {
-    return listOf(
-        Task(1, "Tarefa 1", "Descrição da Tarefa 1", TaskStatus.TODO),
-        Task(2, "Tarefa 2", "Descrição da Tarefa 2", TaskStatus.DOING),
-        Task(3, "Tarefa 3", "Descrição da Tarefa 3", TaskStatus.DONE)
-    )
-}

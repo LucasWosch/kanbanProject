@@ -1,48 +1,44 @@
-package com.example.kabanproject.ui.task
-
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import com.example.kabanproject.R
-import com.example.kabanproject.model.Task
-import com.example.kabanproject.model.TaskStatus
+import com.example.kabanproject.data.model.task.Task
+import com.example.kabanproject.ui.viewModels.TaskViewModel
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDetailScreen(
     taskId: String?,
     navController: NavHostController,
-    task: Task
+    taskRepository: TaskViewModel // Adiciona o repositório de tarefas
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    var task by remember { mutableStateOf<Task?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Carrega a tarefa a partir do taskId
+    LaunchedEffect(taskId) {
+        coroutineScope.launch {
+            try {
+                task = taskId?.toIntOrNull()?.let { taskRepository.getTaskById(it) }
+                if (task == null) {
+                    errorMessage = "Tarefa não encontrada"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Erro ao carregar a tarefa"
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -70,18 +66,27 @@ fun TaskDetailScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            Text(text = "Título: ${task.title}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Status: ${task.status}", fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Descrição: ${task.description}", fontSize = 16.sp) // Exibe a descrição da tarefa
+            task?.let {
+                Text(text = "Título: ${it.title}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Status: ${it.status}", fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Descrição: ${it.description}", fontSize = 16.sp)
 
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = { navController.navigate("taskForm/${task.id}") },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("Editar Tarefa")
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = { navController.navigate("taskForm/${it.id}") },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Editar Tarefa")
+                }
+            } ?: run {
+                Text(
+                    text = errorMessage ?: "Carregando...",
+                    fontSize = 18.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
