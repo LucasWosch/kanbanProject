@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kabanproject"
+    namespace = "com.example.kanbanproject"
     compileSdk = 34
 
     defaultConfig {
@@ -51,13 +51,16 @@ android {
 }
 
 dependencies {
-    // Firebase dependencies
+    implementation("androidx.compose.material:material-icons-core")
+    implementation ("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
-    // AndroidX and other dependencies
-    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,13 +69,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.compose.v272)
-    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.material)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.common)
-    implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.room.ktx)
-
-    // Testing dependencies
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

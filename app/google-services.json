@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "950847863913",
-    "project_id": "kanbanproject-32017",
-    "storage_bucket": "kanbanproject-32017.firebasestorage.app"
+    "project_number": "91833765487",
+    "project_id": "kabanproject-bbeb3",
+    "storage_bucket": "kabanproject-bbeb3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:950847863913:android:3f85a000f89f1c0e2876f8",
+        "mobilesdk_app_id": "1:91833765487:android:ddcf91992cd9b5eedb479a",
         "android_client_info": {
           "package_name": "com.example.kabanproject"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDu56BPVuF9UGij36OyQ7N1saNxqV63n7M"
+          "current_key": "AIzaSyBeqH2l50x2iA73PbTlH7hsCGbllvBmmQU"
         }
       ],
       "services": {
